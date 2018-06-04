@@ -6,9 +6,15 @@ Current version is using S3 bucket policy to allow only calls to the private S3 
 Docker image used - https://hub.docker.com/r/rrusakov/nginx-aws_auth-ldap/
 
 # How to use
-- `terrafrom plan`
-- `terrafrom apply`
-- check terrafrom run output
+- create AWS credentials file .aws/creds with the folowing data:
+```
+[default]
+aws_access_key_id = "XXXXXXXXXXXXXXX"
+aws_secret_access_key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+```
+- `terraform plan`
+- `terraform apply`
+- check terraform run output
 
 Example output:
 ```
@@ -37,5 +43,5 @@ where
 - Add some example LDAP provider to use it for authentication
 
 # Known issues
-- There possibly is some problem to assume role from the Fargate container https://forums.aws.amazon.com/thread.jspa?messageID=830807&tstart=0
+- There is a potential issue with IAM roles for AWS Fargate containers - https://forums.aws.amazon.com/thread.jspa?messageID=830807&tstart=0
 - Signing keys have a validity of just one week. Hence, they need to be refreshed constantly - https://github.com/anomalizer/ngx_aws_auth#security-considerations so we need either some cron job inside the container with nginx SIGHUP or just replace containers regulary and generate new session keys every time during the startup script.

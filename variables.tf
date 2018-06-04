@@ -45,7 +45,7 @@ variable "fargate_memory" {
 variable "s3_bucket_name" {
   description = "The name of the bucket"
   type        = "string"
-  default     = "test-s3-private-bucket-vpce-2"
+  default     = "test-s3-private-bucket-vpce-3"
 }
 
 variable "tags" {
