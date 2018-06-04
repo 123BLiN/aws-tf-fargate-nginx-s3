@@ -6,10 +6,11 @@ Current version is using S3 bucket policy to allow only calls to the private S3 
 Docker image used - https://hub.docker.com/r/rrusakov/nginx-aws_auth-ldap/
 
 # TODO
+- Add autoscaling group
 - Create and attach IAM role to the fargate tasks
 - Authenticate internal API calls to the S3 bucket by using AWS assume role inside the container and utilize AWS IAM attached to the container
 - Add nginx configuration with aws_auth module and IAM role 
-- Parametrize nginx configuration in docker container
+- Parametrize nginx virtualhost configuration in docker container with envsubst
 - Refactor to use terraform modules
 - Add some example LDAP provider to use it for authentication
 
