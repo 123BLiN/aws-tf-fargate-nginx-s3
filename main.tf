@@ -10,7 +10,7 @@ provider "aws" {
 data "aws_availability_zones" "available" {}
 
 resource "aws_vpc" "main" {
-  cidr_block = "172.17.0.0/16"
+  cidr_block = "10.42.0.0/16"
 }
 
 # Create var.az_count private subnets, each in a different AZ
@@ -147,6 +147,99 @@ resource "aws_alb_listener" "front_end" {
   }
 }
 
+### S3
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id          = "${aws_vpc.main.id}"
+  service_name    = "com.amazonaws.us-west-2.s3"
+}
+
+resource "aws_vpc_endpoint_route_table_association" "private_s3" {
+  vpc_endpoint_id = "${aws_vpc_endpoint.s3.id}"
+  route_table_id  = "${element(aws_route_table.private.*.id, count.index)}"
+}
+
+data "aws_iam_policy_document" "s3-policy" {
+  statement {
+    sid = "Unauthenticated-access-for-specific-VPCE"
+
+    actions = [
+      "s3:*"
+    ]
+
+    effect = "Allow"
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:sourceVpce"
+
+      values = [
+        "${aws_vpc_endpoint.s3.id}"
+      ]
+    }
+
+    resources = [
+      "arn:aws:s3:::${var.s3_bucket_name}",
+      "arn:aws:s3:::${var.s3_bucket_name}/*",
+    ]
+    
+    # todo - set concrete principal
+    principals = {
+      type = "*"
+      identifiers = ["*"]
+    }
+  }
+}
+
+# Create test bucket and add policy
+resource "aws_s3_bucket" "private_bucket" {
+  bucket = "${var.s3_bucket_name}"
+  acl    = "private"
+  policy = "${data.aws_iam_policy_document.s3-policy.json}"
+  tags   = "${var.tags}"
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    enabled = true
+
+    abort_incomplete_multipart_upload_days = 14
+
+    expiration {
+      expired_object_delete_marker = true
+    }
+
+    noncurrent_version_transition {
+      days          = 30
+      storage_class = "STANDARD_IA"
+    }
+
+    noncurrent_version_expiration {
+      days = 365
+    }
+  }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
+
+# https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/vpc-endpoints-s3.html
+# Endpoints currently do not support cross-region requests—ensure that you create your 
+# endpoint in the same region as your bucket. You can find the location of your bucket 
+# by using the Amazon S3 console, or by using the get-bucket-location command. 
+# Use a region-specific Amazon S3 endpoint to access your bucket; 
+# for example, mybucket.s3-us-west-2.amazonaws.com.
+locals {
+  s3_access_endpoint = "${aws_s3_bucket.private_bucket.id}.s3-${aws_s3_bucket.private_bucket.region}.amazonaws.com"
+}
+
 ### ECS
 
 resource "aws_ecs_cluster" "main" {
@@ -154,7 +247,7 @@ resource "aws_ecs_cluster" "main" {
 }
 
 resource "aws_ecs_task_definition" "app" {
-  family                   = "app"
+  family                   = "nginx"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "${var.fargate_cpu}"
@@ -201,3 +294,4 @@ resource "aws_ecs_service" "main" {
     "aws_alb_listener.front_end",
   ]
 }
+

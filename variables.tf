@@ -5,7 +5,10 @@ variable "aws_region" {
 
 variable "aws_account_id" {
   description = "AWS account ID"
+
 }
+
+# AWS Fargate vars
 
 variable "az_count" {
   description = "Number of AZs to cover in a given AWS region"
@@ -35,4 +38,21 @@ variable "fargate_cpu" {
 variable "fargate_memory" {
   description = "Fargate instance memory to provision (in MiB)"
   default     = "512"
+}
+
+# AWS S3 vars
+
+variable "s3_bucket_name" {
+  description = "The name of the bucket"
+  type        = "string"
+  default     = "test-s3-private-bucket-vpce-2"
+}
+
+variable "tags" {
+  description = "A mapping of tags to assign to the bucket."
+  default     = {
+    Name        = "Nginx s3 test bucket"
+    Environment = "Test"
+  }
+  type        = "map"
 }
