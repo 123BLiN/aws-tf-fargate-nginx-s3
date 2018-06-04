@@ -241,6 +241,22 @@ locals {
   s3_access_endpoint = "${aws_s3_bucket.private_bucket.id}.s3-${aws_s3_bucket.private_bucket.region}.amazonaws.com"
 }
 
+# create example s3 object
+resource "aws_s3_bucket_object" "secret_object" {
+  bucket = "${var.s3_bucket_name}"
+  key    = "secret_file.txt"
+  source = "secret_file.txt"
+}
+
+# create outputs
+locals {
+  s3_external_object_url = "https://s3.${aws_s3_bucket.private_bucket.region}.amazonaws.com/${aws_s3_bucket.private_bucket.id}/${aws_s3_bucket_object.secret_object.id}"
+}
+
+locals {
+  s3_nginx_object_url = "http://${aws_alb.main.dns_name}/s3/${aws_s3_bucket_object.secret_object.id}"
+}
+
 ### ECS
 
 resource "aws_ecs_cluster" "main" {

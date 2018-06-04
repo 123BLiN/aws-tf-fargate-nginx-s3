@@ -11,3 +11,11 @@ output "alb_hostname" {
 output "s3_access_endpoint" {
   value = "${local.s3_access_endpoint}"
 }
+
+output "s3_external_object_url" {
+  value = "${local.s3_external_object_url}"
+}
+
+output "s3_nginx_object_url" {
+  value = "${local.s3_nginx_object_url}"
+}
