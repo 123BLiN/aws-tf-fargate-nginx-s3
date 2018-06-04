@@ -17,7 +17,7 @@ Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
 Outputs:
 
 alb_hostname = tf-ecs-chat-xxxxxx.us-west-2.elb.amazonaws.com
-s3_access_endpoint = test-s3-private-bucket-vpce-2.s3-us-west-2.amazonaws.com
+s3_access_endpoint = yyyyyyy.s3-us-west-2.amazonaws.com
 s3_external_object_url = https://s3.us-west-2.amazonaws.com/yyyyyyy/secret_file.txt
 s3_nginx_object_url = http://tf-ecs-chat-xxxxxx.us-west-2.elb.amazonaws.com/s3/secret_file.txt
 ```
